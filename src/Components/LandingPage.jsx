@@ -46,7 +46,7 @@ const LandingPage = () => {
           </div>
           <div className="flex justify-center">
             <img 
-              src="/api/placeholder/600/400" 
+              src="\public\Untitled-2025-03-15-1442.png" 
               alt="Claims management dashboard" 
               className="rounded-lg shadow-xl"
             />
