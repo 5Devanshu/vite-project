@@ -41,23 +41,7 @@ Ensure code consistency using ESLint:
 npm run lint
 ```
 
-## 📁 Project Structure
 
-```
-📦 your-project
-├── 📂 src
-│   ├── 📂 components  # Reusable UI components
-│   ├── 📂 pages       # Page-level components
-│   ├── 📂 assets      # Static assets
-│   ├── main.jsx       # Entry point
-│   ├── App.jsx        # Root component
-├── 📂 public          # Static public files
-├── 📜 .gitignore      # Git ignored files
-├── 📜 package.json    # Dependencies & scripts
-├── 📜 tailwind.config.js # Tailwind configuration
-├── 📜 vite.config.js  # Vite configuration
-└── 📜 README.md       # Project documentation
-```
 
 ## 📜 License
 
