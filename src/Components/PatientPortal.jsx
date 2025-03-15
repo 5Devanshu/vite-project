@@ -1,4 +1,243 @@
 import React, { useState } from 'react';
+import { 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  Filter, 
+  FileText, 
+  User, 
+  Mail, 
+  DollarSign, 
+  Upload, 
+  FileUp 
+} from 'lucide-react';
+
+// Custom UI components to replace shadcn/ui imports
+const Tabs = ({ defaultValue, className, children }) => {
+  const [activeTab, setActiveTab] = useState(defaultValue);
+  
+  // Clone children with added props
+  const childrenWithProps = React.Children.map(children, child => {
+    if (child.type === TabsList || child.type === TabsContent) {
+      return React.cloneElement(child, { activeTab, setActiveTab });
+    }
+    return child;
+  });
+  
+  return <div className={className}>{childrenWithProps}</div>;
+};
+
+const TabsList = ({ className, children, activeTab, setActiveTab }) => {
+  // Clone TabsTrigger children with active state
+  const triggers = React.Children.map(children, child => {
+    if (child.type === TabsTrigger) {
+      return React.cloneElement(child, { 
+        active: activeTab === child.props.value,
+        onClick: () => setActiveTab(child.props.value),
+        setActiveTab
+      });
+    }
+    return child;
+  });
+  
+  return <div className={className}>{triggers}</div>;
+};
+
+const TabsTrigger = ({ value, active, onClick, children }) => {
+  return (
+    <button 
+      className={`py-2 px-4 text-center font-medium ${active ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+};
+
+const TabsContent = ({ value, activeTab, children }) => {
+  if (value !== activeTab) return null;
+  return <div>{children}</div>;
+};
+
+const Card = ({ children }) => <div className="bg-white rounded-lg shadow-md overflow-hidden">{children}</div>;
+const CardHeader = ({ children }) => <div className="p-6 border-b border-gray-200">{children}</div>;
+const CardTitle = ({ children }) => <h2 className="text-xl font-semibold text-gray-800">{children}</h2>;
+const CardDescription = ({ children }) => <p className="text-sm text-gray-500 mt-1">{children}</p>;
+const CardContent = ({ children }) => <div className="p-6">{children}</div>;
+
+const Button = ({ children, type, variant, size, className, onClick }) => {
+  const baseClass = "font-medium rounded focus:outline-none transition-colors";
+  const variantClass = variant === "outline" 
+    ? "border border-gray-300 text-gray-700 hover:bg-gray-50" 
+    : variant === "ghost"
+      ? "text-gray-700 hover:bg-gray-100"
+      : "bg-blue-600 text-white hover:bg-blue-700";
+  const sizeClass = size === "sm" 
+    ? "py-1 px-3 text-sm" 
+    : "py-2 px-4";
+    
+  return (
+    <button
+      type={type || "button"}
+      className={`${baseClass} ${variantClass} ${sizeClass} ${className || ""}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+};
+
+const Badge = ({ children, className }) => (
+  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
+    {children}
+  </span>
+);
+
+const Input = ({ id, name, type, placeholder, value, onChange, required, step, min }) => (
+  <input
+    id={id}
+    name={name}
+    type={type || "text"}
+    placeholder={placeholder}
+    value={value}
+    onChange={onChange}
+    required={required}
+    step={step}
+    min={min}
+    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  />
+);
+
+const Label = ({ htmlFor, children, className }) => (
+  <label htmlFor={htmlFor} className={`block text-sm font-medium text-gray-700 ${className || ""}`}>
+    {children}
+  </label>
+);
+
+const Textarea = ({ id, name, placeholder, value, onChange, required, rows }) => (
+  <textarea
+    id={id}
+    name={name}
+    placeholder={placeholder}
+    value={value}
+    onChange={onChange}
+    required={required}
+    rows={rows || 3}
+    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  />
+);
+
+// Table components
+const Table = ({ children }) => <table className="min-w-full divide-y divide-gray-200">{children}</table>;
+const TableHeader = ({ children }) => <thead className="bg-gray-50">{children}</thead>;
+const TableBody = ({ children }) => <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>;
+const TableRow = ({ children }) => <tr>{children}</tr>;
+const TableHead = ({ children }) => <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{children}</th>;
+const TableCell = ({ children, className }) => <td className={`px-6 py-4 whitespace-nowrap ${className || ""}`}>{children}</td>;
+
+// Dialog components
+const Dialog = ({ children }) => {
+  const [open, setOpen] = useState(false);
+  return React.Children.map(children, child => {
+    if (child.type === DialogTrigger) {
+      return React.cloneElement(child, { setOpen });
+    }
+    if (child.type === DialogContent) {
+      return open ? React.cloneElement(child, { setOpen }) : null;
+    }
+    return child;
+  });
+};
+
+const DialogTrigger = ({ children, setOpen, asChild }) => {
+  return asChild ? React.cloneElement(children, {
+    onClick: (e) => {
+      e.preventDefault();
+      setOpen(true);
+      if (children.props.onClick) children.props.onClick(e);
+    }
+  }) : (
+    <button onClick={() => setOpen(true)}>{children}</button>
+  );
+};
+
+const DialogContent = ({ children, setOpen, className }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+    <div className={`bg-white rounded-lg max-w-md w-full p-6 ${className || ""}`}>
+      <button 
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+        onClick={() => setOpen(false)}
+      >
+        ✕
+      </button>
+      {children}
+    </div>
+  </div>
+);
+
+const DialogHeader = ({ children }) => <div className="mb-4">{children}</div>;
+const DialogTitle = ({ children }) => <h3 className="text-lg font-medium text-gray-900">{children}</h3>;
+const DialogDescription = ({ children }) => <p className="text-sm text-gray-500 mt-1">{children}</p>;
+
+// Select components
+const Select = ({ children, value, onValueChange }) => {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <div className="relative">
+      {React.Children.map(children, child => {
+        if (child.type === SelectTrigger) {
+          return React.cloneElement(child, { value, open, setOpen });
+        }
+        if (child.type === SelectContent) {
+          return open ? React.cloneElement(child, { onValueChange, setOpen }) : null;
+        }
+        return child;
+      })}
+    </div>
+  );
+};
+
+const SelectTrigger = ({ children, className, value, open, setOpen }) => (
+  <button 
+    type="button"
+    className={`flex items-center justify-between w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white ${className || ""}`}
+    onClick={() => setOpen(!open)}
+  >
+    {children}
+    <span className="ml-2">▼</span>
+  </button>
+);
+
+const SelectContent = ({ children, onValueChange, setOpen }) => (
+  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+    <ul className="py-1 max-h-60 overflow-auto">
+      {React.Children.map(children, child => {
+        if (child.type === SelectItem) {
+          return React.cloneElement(child, { 
+            onClick: () => {
+              onValueChange(child.props.value);
+              setOpen(false);
+            }
+          });
+        }
+        return child;
+      })}
+    </ul>
+  </div>
+);
+
+const SelectItem = ({ children, value, onClick }) => (
+  <li 
+    className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
+    onClick={onClick}
+  >
+    {children}
+  </li>
+);
+
+const SelectValue = ({ placeholder }) => <span>{placeholder}</span>;
+
 const PatientPortal = () => {
   // Mock data for claims
   const [claims, setClaims] = useState([
@@ -40,7 +279,7 @@ const PatientPortal = () => {
     }
   ]);
 
-  // State for new claim form
+  // Form and UI states
   const [newClaim, setNewClaim] = useState({
     name: 'John Doe',
     email: 'john@example.com',
@@ -48,22 +287,15 @@ const PatientPortal = () => {
     description: '',
     document: null
   });
-
-  // State for file upload
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileName, setFileName] = useState('');
-
-  // State for claim filters
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedClaimId, setSelectedClaimId] = useState(null);
 
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewClaim({
-      ...newClaim,
-      [name]: value
-    });
+    setNewClaim(prev => ({ ...prev, [name]: value }));
   };
 
   // Handle file selection
@@ -91,7 +323,7 @@ const PatientPortal = () => {
     };
     
     // Add to claims list
-    setClaims([...claims, claim]);
+    setClaims(prev => [...prev, claim]);
     
     // Reset form
     setNewClaim({
@@ -104,7 +336,7 @@ const PatientPortal = () => {
     setSelectedFile(null);
     setFileName('');
     
-    // Show success message (could use a toast notification here)
+    // Show success message
     alert('Claim submitted successfully!');
   };
 

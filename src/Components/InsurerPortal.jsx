@@ -12,7 +12,11 @@ import {
   ChevronDown,
   ArrowUpDown
 } from 'lucide-react';
+
 const InsurerPortal = () => {
+  // Tab state
+  const [activeTab, setActiveTab] = useState('dashboard');
+  
   // Mock data for claims
   const [claims, setClaims] = useState([
     {
@@ -263,14 +267,35 @@ const InsurerPortal = () => {
           <p className="text-gray-600">Review and manage patient healthcare claims</p>
         </header>
 
-        <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="claims">Claims Management</TabsTrigger>
-          </TabsList>
+        {/* Simple Tab System */}
+        <div className="mb-6">
+          <div className="flex border-b border-gray-300">
+            <button
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'dashboard'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+              onClick={() => setActiveTab('dashboard')}
+            >
+              Dashboard
+            </button>
+            <button
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'claims'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+              onClick={() => setActiveTab('claims')}
+            >
+              Claims Management
+            </button>
+          </div>
+        </div>
           
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard">
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
+          <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="bg-white shadow-lg rounded-lg p-4">
                 <h3 className="text-lg font-semibold">Total Claims</h3>
@@ -294,7 +319,7 @@ const InsurerPortal = () => {
                 <h3 className="text-lg font-semibold">Approved Amount</h3>
                 <div className="text-3xl font-bold">${stats.approvedAmount.toFixed(2)}</div>
                 <div className="text-sm text-gray-500 mt-2">
-                  {((stats.approvedAmount / stats.totalAmount) * 100).toFixed(1)}% of total claimed
+                  {stats.totalAmount > 0 ? ((stats.approvedAmount / stats.totalAmount) * 100).toFixed(1) : 0}% of total claimed
                 </div>
               </div>
             </div>
@@ -305,11 +330,11 @@ const InsurerPortal = () => {
                 <table className="table-auto w-full">
                   <thead>
                     <tr>
-                      <th className="p-2">Patient</th>
-                      <th className="p-2">Date</th>
-                      <th className="p-2">Amount</th>
-                      <th className="p-2">Status</th>
-                      <th className="p-2">Action</th>
+                      <th className="p-2 text-left">Patient</th>
+                      <th className="p-2 text-left">Date</th>
+                      <th className="p-2 text-left">Amount</th>
+                      <th className="p-2 text-left">Status</th>
+                      <th className="p-2 text-left">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -337,22 +362,24 @@ const InsurerPortal = () => {
                 </table>
               </div>
             </div>
-          </TabsContent>
+          </>
+        )}
           
-          {/* Claims Management Tab */}
-          <TabsContent value="claims">
+        {/* Claims Management Tab */}
+        {activeTab === 'claims' && (
+          <>
             <div className="mb-6 grid grid-cols-1 gap-6">
               <div className="bg-white shadow-lg rounded-lg p-4">
                 <h3 className="text-lg font-semibold">Filter Claims</h3>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                   <div className="md:col-span-4">
-                    <label htmlFor="search">Search</label>
-                    <div className="relative mt-1">
+                    <label htmlFor="search" className="block mb-1">Search</label>
+                    <div className="relative">
                       <Search className="absolute left-2 top-3 h-4 w-4 text-gray-500" />
                       <input 
                         id="search" 
                         placeholder="Search by name, email, policy..." 
-                        className="pl-8"
+                        className="pl-8 w-full p-2 border border-gray-300 rounded"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -360,8 +387,10 @@ const InsurerPortal = () => {
                   </div>
                   
                   <div className="md:col-span-2">
-                    <label htmlFor="status-filter">Status</label>
+                    <label htmlFor="status-filter" className="block mb-1">Status</label>
                     <select 
+                      id="status-filter"
+                      className="w-full p-2 border border-gray-300 rounded"
                       value={statusFilter} 
                       onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -373,8 +402,10 @@ const InsurerPortal = () => {
                   </div>
                   
                   <div className="md:col-span-3">
-                    <label htmlFor="date-filter">Submission Date</label>
+                    <label htmlFor="date-filter" className="block mb-1">Submission Date</label>
                     <select 
+                      id="date-filter"
+                      className="w-full p-2 border border-gray-300 rounded"
                       value={dateFilter} 
                       onChange={(e) => setDateFilter(e.target.value)}
                     >
@@ -386,8 +417,10 @@ const InsurerPortal = () => {
                   </div>
                   
                   <div className="md:col-span-3">
-                    <label htmlFor="amount-filter">Claim Amount</label>
+                    <label htmlFor="amount-filter" className="block mb-1">Claim Amount</label>
                     <select 
+                      id="amount-filter"
+                      className="w-full p-2 border border-gray-300 rounded"
                       value={amountFilter} 
                       onChange={(e) => setAmountFilter(e.target.value)}
                     >
@@ -407,27 +440,27 @@ const InsurerPortal = () => {
                 <table className="table-auto w-full">
                   <thead>
                     <tr>
-                      <th className="p-2 cursor-pointer" onClick={() => handleSort('name')}>
+                      <th className="p-2 text-left cursor-pointer" onClick={() => handleSort('name')}>
                         Patient
                         {sortBy === 'name' && (
                           <ArrowUpDown className={`ml-2 h-4 w-4 inline ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
                         )}
                       </th>
-                      <th className="p-2">Policy Number</th>
-                      <th className="p-2 cursor-pointer" onClick={() => handleSort('submissionDate')}>
+                      <th className="p-2 text-left">Policy Number</th>
+                      <th className="p-2 text-left cursor-pointer" onClick={() => handleSort('submissionDate')}>
                         Date
                         {sortBy === 'submissionDate' && (
                           <ArrowUpDown className={`ml-2 h-4 w-4 inline ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
                         )}
                       </th>
-                      <th className="p-2 cursor-pointer" onClick={() => handleSort('claimAmount')}>
+                      <th className="p-2 text-left cursor-pointer" onClick={() => handleSort('claimAmount')}>
                         Amount
                         {sortBy === 'claimAmount' && (
                           <ArrowUpDown className={`ml-2 h-4 w-4 inline ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
                         )}
                       </th>
-                      <th className="p-2">Status</th>
-                      <th className="p-2">Action</th>
+                      <th className="p-2 text-left">Status</th>
+                      <th className="p-2 text-left">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -452,8 +485,134 @@ const InsurerPortal = () => {
                 </table>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          </>
+        )}
+
+        {/* Review Sheet Modal */}
+        {showReviewSheet && selectedClaim && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold mb-4">Review Claim</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm text-gray-500">Patient</p>
+                  <p className="font-medium">{selectedClaim.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Policy Number</p>
+                  <p className="font-medium">{selectedClaim.policyNumber}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Submission Date</p>
+                  <p className="font-medium">{selectedClaim.submissionDate}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Claimed Amount</p>
+                  <p className="font-medium">${selectedClaim.claimAmount.toFixed(2)}</p>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-500">Description</p>
+                <p>{selectedClaim.description}</p>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-500">Attached Document</p>
+                <div className="flex items-center mt-1">
+                  <FileText className="h-5 w-5 mr-2 text-blue-500" />
+                  <span>{selectedClaim.document}</span>
+                  <button className="ml-2 text-blue-500 flex items-center">
+                    <Download className="h-4 w-4 mr-1" /> Download
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="status" className="block mb-1">Status</label>
+                <div className="flex space-x-2">
+                  <button
+                    className={`px-4 py-2 rounded-sm flex items-center ${
+                      reviewForm.status === 'Approved' 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                    onClick={() => handleStatusChange('Approved')}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" /> Approve
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded-sm flex items-center ${
+                      reviewForm.status === 'Rejected' 
+                        ? 'bg-red-500 text-white' 
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                    onClick={() => handleStatusChange('Rejected')}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" /> Reject
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded-sm flex items-center ${
+                      reviewForm.status === 'Pending' 
+                        ? 'bg-yellow-500 text-white' 
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                    onClick={() => handleStatusChange('Pending')}
+                  >
+                    <Clock className="h-4 w-4 mr-2" /> Pending
+                  </button>
+                </div>
+              </div>
+              
+              {reviewForm.status === 'Approved' && (
+                <div className="mb-4">
+                  <label htmlFor="approvedAmount" className="block mb-1">Approved Amount</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-2 top-3 h-4 w-4 text-gray-500" />
+                    <input
+                      type="number"
+                      id="approvedAmount"
+                      name="approvedAmount"
+                      className="pl-8 w-full p-2 border border-gray-300 rounded"
+                      value={reviewForm.approvedAmount}
+                      onChange={handleReviewChange}
+                      placeholder="Enter approved amount"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div className="mb-4">
+                <label htmlFor="insurerComments" className="block mb-1">Comments</label>
+                <textarea
+                  id="insurerComments"
+                  name="insurerComments"
+                  rows="4"
+                  className="w-full p-2 border border-gray-300 rounded"
+                  value={reviewForm.insurerComments || ''}
+                  onChange={handleReviewChange}
+                  placeholder="Add comments about this claim..."
+                ></textarea>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <button 
+                  className="px-4 py-2 bg-gray-300 rounded-sm"
+                  onClick={() => setShowReviewSheet(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="px-4 py-2 bg-blue-500 text-white rounded-sm"
+                  onClick={handleSubmitReview}
+                >
+                  Save Review
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

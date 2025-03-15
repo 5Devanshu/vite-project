@@ -10,12 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-icons": "^1.3.2",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-tabs": "^1.1.3",
     "@tailwindcss/vite": "^4.0.13",
+    "axios": "^1.8.3",
     "lucide-react": "^0.479.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
-    "tailwindcss": "^4.0.13",
+    "tailwindcss": "^4.0.14",
     "vite-project": "file:"
   },
   "devDependencies": {

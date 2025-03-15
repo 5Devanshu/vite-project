@@ -18,7 +18,7 @@ const LandingPage = () => {
             <button className="px-4 py-2 border border-gray-300 text-blue-600 rounded-lg hover:bg-gray-100">About</button>
             <button className="px-4 py-2 border border-gray-300 text-blue-600 rounded-lg hover:bg-gray-100">Features</button>
             <button className="px-4 py-2 border border-gray-300 text-blue-600 rounded-lg hover:bg-gray-100">Contact</button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Sign In</button>
+            <Link to="/login"><button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Sign In</button></Link>
           </div>
         </div>
       </header>
@@ -30,13 +30,13 @@ const LandingPage = () => {
             <h2 className="text-4xl font-bold mb-4">Simplifying Healthcare Claims Management</h2>
             <p className="text-xl mb-8">A streamlined platform for patients and insurers to manage healthcare claims efficiently and transparently.</p>
             <div className="flex gap-4">
-            <Link to="/patient-portal">
+            <Link to="/login">
               <button className="px-6 py-2 bg-white text-blue-700 hover:bg-gray-100 rounded-lg">
                 Patient Portal
                 <ArrowRight className="ml-2 h-4 w-4" />
               </button>
               </Link>
-              <Link to="/insurer-portal">
+              <Link to="/login  ">
               <button className="px-6 py-2 border border-white text-white hover:bg-blue-600 rounded-lg">
                 Insurer Portal
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -94,8 +94,8 @@ const LandingPage = () => {
           
           <div className="flex justify-center mb-8">
             <div className="flex gap-8">
-              <button className="px-4 py-2 text-blue-600 border border-gray-300 rounded-lg hover:bg-blue-100">Patient Portal</button>
-              <button className="px-4 py-2 text-blue-600 border border-gray-300 rounded-lg hover:bg-blue-100">Insurer Portal</button>
+              <Link to="/patient-portal"><button className="px-4 py-2 text-blue-600 border border-gray-300 rounded-lg hover:bg-blue-100">Patient Portal</button></Link>
+              <Link to="/insurer-portal"><button className="px-4 py-2 text-blue-600 border border-gray-300 rounded-lg hover:bg-blue-100">Insurer Portal</button></Link>
             </div>
           </div>
 
@@ -183,7 +183,7 @@ const LandingPage = () => {
           <h2 className="text-3xl font-bold mb-4">Ready to Streamline Your Claims Process?</h2>
           <p className="text-xl mb-8 max-w-3xl mx-auto">Join ClaimCare today to experience a more efficient, transparent, and user-friendly healthcare claims management system.</p>
           <div className="flex justify-center gap-4">
-            <button className="px-6 py-2 bg-white text-blue-700 hover:bg-gray-100 rounded-lg">Sign Up Now</button>
+          <Link to="/login"><button className="px-6 py-2 bg-white text-blue-700 hover:bg-gray-100 rounded-lg">Sign Up Now</button></Link>
             <button className="px-6 py-2 border border-white text-white hover:bg-blue-700 rounded-lg">Request Demo</button>
           </div>
         </div>
