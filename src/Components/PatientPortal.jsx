@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle, 
   XCircle, 
@@ -9,288 +9,305 @@ import {
   Mail, 
   DollarSign, 
   Upload, 
-  FileUp 
+  FileUp,
+  LogOut
 } from 'lucide-react';
 
-// Custom UI components to replace shadcn/ui imports
-const Tabs = ({ defaultValue, className, children }) => {
-  const [activeTab, setActiveTab] = useState(defaultValue);
-  
-  // Clone children with added props
-  const childrenWithProps = React.Children.map(children, child => {
-    if (child.type === TabsList || child.type === TabsContent) {
-      return React.cloneElement(child, { activeTab, setActiveTab });
-    }
-    return child;
-  });
-  
-  return <div className={className}>{childrenWithProps}</div>;
-};
+// Import the UI components that were missing
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  Button,
+  Input,
+  Label,
+  Textarea,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Badge,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui';
 
-const TabsList = ({ className, children, activeTab, setActiveTab }) => {
-  // Clone TabsTrigger children with active state
-  const triggers = React.Children.map(children, child => {
-    if (child.type === TabsTrigger) {
-      return React.cloneElement(child, { 
-        active: activeTab === child.props.value,
-        onClick: () => setActiveTab(child.props.value),
-        setActiveTab
-      });
-    }
-    return child;
+// Login Form Component
+const LoginForm = ({ onLogin, onSwitchToRegister, loginError }) => {
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: ''
   });
-  
-  return <div className={className}>{triggers}</div>;
-};
 
-const TabsTrigger = ({ value, active, onClick, children }) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await onLogin(credentials.email, credentials.password);
+  };
+
   return (
-    <button 
-      className={`py-2 px-4 text-center font-medium ${active ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
+    <Card>
+      <CardHeader>
+        <CardTitle>Login to Patient Portal</CardTitle>
+        <CardDescription>Enter your credentials to access your account</CardDescription>
+      </CardHeader>
+      
+      <CardContent>
+        {loginError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {loginError}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="flex items-center">
+              <Mail className="w-4 h-4 mr-2" />
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={credentials.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="password" className="flex items-center">
+              <Mail className="w-4 h-4 mr-2" />
+              Password
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              value={credentials.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="pt-2">
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+          </div>
+          
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <button 
+                type="button" 
+                className="text-blue-600 hover:underline"
+                onClick={onSwitchToRegister}
+              >
+                Register here
+              </button>
+            </p>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
-const TabsContent = ({ value, activeTab, children }) => {
-  if (value !== activeTab) return null;
-  return <div>{children}</div>;
-};
+// Registration Form Component
+const RegisterForm = ({ onRegister, onSwitchToLogin, registerError }) => {
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
 
-const Card = ({ children }) => <div className="bg-white rounded-lg shadow-md overflow-hidden">{children}</div>;
-const CardHeader = ({ children }) => <div className="p-6 border-b border-gray-200">{children}</div>;
-const CardTitle = ({ children }) => <h2 className="text-xl font-semibold text-gray-800">{children}</h2>;
-const CardDescription = ({ children }) => <p className="text-sm text-gray-500 mt-1">{children}</p>;
-const CardContent = ({ children }) => <div className="p-6">{children}</div>;
-
-const Button = ({ children, type, variant, size, className, onClick }) => {
-  const baseClass = "font-medium rounded focus:outline-none transition-colors";
-  const variantClass = variant === "outline" 
-    ? "border border-gray-300 text-gray-700 hover:bg-gray-50" 
-    : variant === "ghost"
-      ? "text-gray-700 hover:bg-gray-100"
-      : "bg-blue-600 text-white hover:bg-blue-700";
-  const sizeClass = size === "sm" 
-    ? "py-1 px-3 text-sm" 
-    : "py-2 px-4";
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserData(prev => ({ ...prev, [name]: value }));
     
+    // Clear password error when user types
+    if (name === 'password' || name === 'confirmPassword') {
+      setPasswordError('');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate passwords match
+    if (userData.password !== userData.confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+    
+    // Register user
+    await onRegister(userData.name, userData.email, userData.password);
+    
+    // Switch to login after successful registration
+    onSwitchToLogin();
+  };
+
   return (
-    <button
-      type={type || "button"}
-      className={`${baseClass} ${variantClass} ${sizeClass} ${className || ""}`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
+    <Card>
+      <CardHeader>
+        <CardTitle>Register for Patient Portal</CardTitle>
+        <CardDescription>Create an account to submit and track claims</CardDescription>
+      </CardHeader>
+      
+      <CardContent>
+        {registerError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {registerError}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="flex items-center">
+              <User className="w-4 h-4 mr-2" />
+              Full Name
+            </Label>
+            <Input
+              id="name"
+              name="name"
+              value={userData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email" className="flex items-center">
+              <Mail className="w-4 h-4 mr-2" />
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={userData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="password" className="flex items-center">
+              <Mail className="w-4 h-4 mr-2" />
+              Password
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              value={userData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="flex items-center">
+              <Mail className="w-4 h-4 mr-2" />
+              Confirm Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              value={userData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+            {passwordError && (
+              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+            )}
+          </div>
+          
+          <div className="pt-2">
+            <Button type="submit" className="w-full">
+              Register
+            </Button>
+          </div>
+          
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-600">
+              Already have an account?{' '}
+              <button 
+                type="button" 
+                className="text-blue-600 hover:underline"
+                onClick={onSwitchToLogin}
+              >
+                Login here
+              </button>
+            </p>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
-const Badge = ({ children, className }) => (
-  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
-    {children}
-  </span>
-);
-
-const Input = ({ id, name, type, placeholder, value, onChange, required, step, min }) => (
-  <input
-    id={id}
-    name={name}
-    type={type || "text"}
-    placeholder={placeholder}
-    value={value}
-    onChange={onChange}
-    required={required}
-    step={step}
-    min={min}
-    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-  />
-);
-
-const Label = ({ htmlFor, children, className }) => (
-  <label htmlFor={htmlFor} className={`block text-sm font-medium text-gray-700 ${className || ""}`}>
-    {children}
-  </label>
-);
-
-const Textarea = ({ id, name, placeholder, value, onChange, required, rows }) => (
-  <textarea
-    id={id}
-    name={name}
-    placeholder={placeholder}
-    value={value}
-    onChange={onChange}
-    required={required}
-    rows={rows || 3}
-    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-  />
-);
-
-// Table components
-const Table = ({ children }) => <table className="min-w-full divide-y divide-gray-200">{children}</table>;
-const TableHeader = ({ children }) => <thead className="bg-gray-50">{children}</thead>;
-const TableBody = ({ children }) => <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>;
-const TableRow = ({ children }) => <tr>{children}</tr>;
-const TableHead = ({ children }) => <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{children}</th>;
-const TableCell = ({ children, className }) => <td className={`px-6 py-4 whitespace-nowrap ${className || ""}`}>{children}</td>;
-
-// Dialog components
-const Dialog = ({ children }) => {
-  const [open, setOpen] = useState(false);
-  return React.Children.map(children, child => {
-    if (child.type === DialogTrigger) {
-      return React.cloneElement(child, { setOpen });
-    }
-    if (child.type === DialogContent) {
-      return open ? React.cloneElement(child, { setOpen }) : null;
-    }
-    return child;
-  });
-};
-
-const DialogTrigger = ({ children, setOpen, asChild }) => {
-  return asChild ? React.cloneElement(children, {
-    onClick: (e) => {
-      e.preventDefault();
-      setOpen(true);
-      if (children.props.onClick) children.props.onClick(e);
-    }
-  }) : (
-    <button onClick={() => setOpen(true)}>{children}</button>
-  );
-};
-
-const DialogContent = ({ children, setOpen, className }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-    <div className={`bg-white rounded-lg max-w-md w-full p-6 ${className || ""}`}>
-      <button 
-        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-        onClick={() => setOpen(false)}
-      >
-        ✕
-      </button>
-      {children}
-    </div>
-  </div>
-);
-
-const DialogHeader = ({ children }) => <div className="mb-4">{children}</div>;
-const DialogTitle = ({ children }) => <h3 className="text-lg font-medium text-gray-900">{children}</h3>;
-const DialogDescription = ({ children }) => <p className="text-sm text-gray-500 mt-1">{children}</p>;
-
-// Select components
-const Select = ({ children, value, onValueChange }) => {
-  const [open, setOpen] = useState(false);
-  
-  return (
-    <div className="relative">
-      {React.Children.map(children, child => {
-        if (child.type === SelectTrigger) {
-          return React.cloneElement(child, { value, open, setOpen });
-        }
-        if (child.type === SelectContent) {
-          return open ? React.cloneElement(child, { onValueChange, setOpen }) : null;
-        }
-        return child;
-      })}
-    </div>
-  );
-};
-
-const SelectTrigger = ({ children, className, value, open, setOpen }) => (
-  <button 
-    type="button"
-    className={`flex items-center justify-between w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white ${className || ""}`}
-    onClick={() => setOpen(!open)}
-  >
-    {children}
-    <span className="ml-2">▼</span>
-  </button>
-);
-
-const SelectContent = ({ children, onValueChange, setOpen }) => (
-  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-    <ul className="py-1 max-h-60 overflow-auto">
-      {React.Children.map(children, child => {
-        if (child.type === SelectItem) {
-          return React.cloneElement(child, { 
-            onClick: () => {
-              onValueChange(child.props.value);
-              setOpen(false);
-            }
-          });
-        }
-        return child;
-      })}
-    </ul>
-  </div>
-);
-
-const SelectItem = ({ children, value, onClick }) => (
-  <li 
-    className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
-    onClick={onClick}
-  >
-    {children}
-  </li>
-);
-
-const SelectValue = ({ placeholder }) => <span>{placeholder}</span>;
-
-const PatientPortal = () => {
-  // Mock data for claims
-  const [claims, setClaims] = useState([
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      claimAmount: 1250.00,
-      description: 'Hospital visit for flu symptoms and prescribed medication.',
-      status: 'Approved',
-      submissionDate: '2025-02-15',
-      approvedAmount: 1000.00,
-      insurerComments: 'Approved with partial coverage due to policy limits.',
-      document: 'hospital_receipt.pdf'
-    },
-    {
-      id: '2',
-      name: 'John Doe',
-      email: 'john@example.com',
-      claimAmount: 450.00,
-      description: 'Dental checkup and cavity filling.',
-      status: 'Pending',
-      submissionDate: '2025-03-01',
-      approvedAmount: null,
-      insurerComments: null,
-      document: 'dental_receipt.pdf'
-    },
-    {
-      id: '3',
-      name: 'John Doe',
-      email: 'john@example.com',
-      claimAmount: 800.00,
-      description: 'Eye examination and new prescription glasses.',
-      status: 'Rejected',
-      submissionDate: '2025-01-20',
-      approvedAmount: 0,
-      insurerComments: 'Not covered under current policy.',
-      document: 'vision_receipt.pdf'
-    }
-  ]);
-
-  // Form and UI states
+const PatientPortal = ({ 
+  claims = [],
+  isLoading = false,
+  error = null,
+  isAuthenticated = false,
+  user = null,
+  onSubmitClaim,
+  onLogin,
+  onRegister,
+  onLogout,
+  refreshClaims
+}) => {
+  // UI states
+  const [authView, setAuthView] = useState('login'); // 'login' or 'register'
   const [newClaim, setNewClaim] = useState({
-    name: 'John Doe',
-    email: 'john@example.com',
+    name: user?.name || '',
+    email: user?.email || '',
     claimAmount: '',
     description: '',
-    document: null
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedClaimId, setSelectedClaimId] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Update form data when user changes
+  useEffect(() => {
+    if (user) {
+      setNewClaim(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || ''
+      }));
+    }
+  }, [user]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -307,49 +324,41 @@ const PatientPortal = () => {
   };
 
   // Submit new claim
-  const handleSubmitClaim = (e) => {
+  const handleSubmitClaim = async (e) => {
     e.preventDefault();
+    setSubmitError(null);
+    setSubmitSuccess(false);
     
-    // Create new claim object
-    const claim = {
-      id: (claims.length + 1).toString(),
-      ...newClaim,
-      claimAmount: parseFloat(newClaim.claimAmount),
-      status: 'Pending',
-      submissionDate: new Date().toISOString().split('T')[0],
-      approvedAmount: null,
-      insurerComments: null,
-      document: fileName || 'No document'
-    };
-    
-    // Add to claims list
-    setClaims(prev => [...prev, claim]);
-    
-    // Reset form
-    setNewClaim({
-      name: 'John Doe',
-      email: 'john@example.com',
-      claimAmount: '',
-      description: '',
-      document: null
-    });
-    setSelectedFile(null);
-    setFileName('');
-    
-    // Show success message
-    alert('Claim submitted successfully!');
+    try {
+      const success = await onSubmitClaim(newClaim, selectedFile);
+      
+      if (success) {
+        // Reset form
+        setNewClaim({
+          name: user?.name || '',
+          email: user?.email || '',
+          claimAmount: '',
+          description: '',
+        });
+        setSelectedFile(null);
+        setFileName('');
+        setSubmitSuccess(true);
+      }
+    } catch (err) {
+      setSubmitError('Failed to submit claim. Please try again.');
+    }
   };
 
   // Get status badge component based on status
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Approved':
-        return <Badge className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" /> Approved</Badge>;
+        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" /> Approved</Badge>;
       case 'Rejected':
-        return <Badge className="bg-red-500"><XCircle className="w-3 h-3 mr-1" /> Rejected</Badge>;
+        return <Badge className="bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" /> Rejected</Badge>;
       case 'Pending':
       default:
-        return <Badge className="bg-yellow-500"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
     }
   };
 
@@ -361,13 +370,62 @@ const PatientPortal = () => {
   // Get claim details for selected claim
   const selectedClaim = claims.find(claim => claim.id === selectedClaimId);
 
+  // If not authenticated, show login/register forms
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-md mx-auto pt-10">
+          <header className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Patient Portal</h1>
+            <p className="text-gray-600">Submit and manage your healthcare claims</p>
+          </header>
+          
+          {authView === 'login' ? (
+            <LoginForm 
+              onLogin={onLogin} 
+              onSwitchToRegister={() => setAuthView('register')}
+              loginError={error}
+            />
+          ) : (
+            <RegisterForm 
+              onRegister={onRegister} 
+              onSwitchToLogin={() => setAuthView('login')}
+              registerError={error}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Patient Portal</h1>
-          <p className="text-gray-600">Submit and manage your healthcare claims</p>
+        <header className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Patient Portal</h1>
+            <p className="text-gray-600">Submit and manage your healthcare claims</p>
+          </div>
+          <div className="flex items-center">
+            <span className="mr-4">Welcome, {user?.name || 'User'}</span>
+            <Button variant="outline" size="sm" onClick={onLogout} className="flex items-center">
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </header>
+
+        {error && !submitError && (
+          <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+            <button 
+              className="float-right font-bold"
+              onClick={() => refreshClaims()}
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         <Tabs defaultValue="claims" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -402,7 +460,11 @@ const PatientPortal = () => {
               </CardHeader>
 
               <CardContent>
-                {filteredClaims.length > 0 ? (
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Loading claims...</p>
+                  </div>
+                ) : filteredClaims.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -417,7 +479,7 @@ const PatientPortal = () => {
                       {filteredClaims.map((claim) => (
                         <TableRow key={claim.id}>
                           <TableCell className="font-medium">{claim.submissionDate}</TableCell>
-                          <TableCell>${claim.claimAmount.toFixed(2)}</TableCell>
+                          <TableCell>${parseFloat(claim.claimAmount).toFixed(2)}</TableCell>
                           <TableCell>{getStatusBadge(claim.status)}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm" className="flex items-center">
@@ -452,7 +514,7 @@ const PatientPortal = () => {
                                       </div>
                                       <div>
                                         <Label>Claim Amount</Label>
-                                        <div className="mt-1 font-semibold">${selectedClaim.claimAmount.toFixed(2)}</div>
+                                        <div className="mt-1 font-semibold">${parseFloat(selectedClaim.claimAmount).toFixed(2)}</div>
                                       </div>
                                     </div>
                                     
@@ -460,7 +522,7 @@ const PatientPortal = () => {
                                       <div>
                                         <Label>Approved Amount</Label>
                                         <div className="mt-1 font-semibold text-green-600">
-                                          ${selectedClaim.approvedAmount.toFixed(2)}
+                                          ${parseFloat(selectedClaim.approvedAmount).toFixed(2)}
                                         </div>
                                       </div>
                                     )}
@@ -513,6 +575,18 @@ const PatientPortal = () => {
               </CardHeader>
               
               <CardContent>
+                {submitSuccess && (
+                  <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    Claim submitted successfully!
+                  </div>
+                )}
+                
+                {submitError && (
+                  <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {submitError}
+                  </div>
+                )}
+              
                 <form onSubmit={handleSubmitClaim} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -527,6 +601,7 @@ const PatientPortal = () => {
                         onChange={handleInputChange}
                         placeholder="Enter your full name"
                         required
+                        disabled={!!user}
                       />
                     </div>
                     
@@ -543,6 +618,7 @@ const PatientPortal = () => {
                         onChange={handleInputChange}
                         placeholder="Enter your email address"
                         required
+                        disabled={!!user}
                       />
                     </div>
                   </div>
